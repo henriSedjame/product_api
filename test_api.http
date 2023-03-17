@@ -1,0 +1,10 @@
+GET http://localhost:8080/api/v1/products/XBOX
+
+###
+GET http://localhost:8080/api/v1/products/XBOX/distributors
+
+###
+GET http://localhost:8080/api/v1/products/XBOX/distributions
+
+###
+GET http://localhost:8080/api/v1/products/distributed?cities=Marseille

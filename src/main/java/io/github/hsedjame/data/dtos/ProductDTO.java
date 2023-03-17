@@ -13,6 +13,7 @@ public record ProductDTO(ProductInfoDTO infos) {
             ProductInfoDTO info = new ObjectMapper().readValue(projection.info(), ProductInfoDTO.class);
             return Optional.of(new ProductDTO(info));
         } catch (JsonProcessingException e) {
+            e.printStackTrace();
             return Optional.empty();
         }
 

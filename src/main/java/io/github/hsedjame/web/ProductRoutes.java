@@ -14,7 +14,6 @@ import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -44,7 +43,7 @@ public record ProductRoutes(@Inject ProductRepository repository) {
     @Route(path = "distributed", methods = Route.HttpMethod.GET, order = 1)
     public Multi<ProductInfoDTO> findDistributedIn(RoutingExchange exchange) {
         String cities = exchange.getParam("cities").orElse("");
-        return repository.findDistributedProductsByCity(Arrays.asList(cities.split(",")))
+        return repository.findDistributedProductsByCity(cities)
                 .map(ProductInfoDTO::fromProjection)
                 .map(Optional::orElseThrow);
     }

@@ -3,8 +3,10 @@ package io.github.hsedjame;
 import io.github.hsedjame.data.entities.Distributor;
 import io.github.hsedjame.data.entities.Product;
 import io.github.hsedjame.data.entities.ProductInfo;
+import io.quarkus.runtime.StartupEvent;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;

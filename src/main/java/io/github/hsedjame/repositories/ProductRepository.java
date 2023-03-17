@@ -82,21 +82,18 @@ public class ProductRepository implements PanacheRepository<Product> {
      * @param cities list of cities
      * @return list of products
      */
-    public Multi<ProductInfoProjection>  findDistributedProductsByCity(List<String> cities) {
+    public Multi<ProductInfoProjection>  findDistributedProductsByCity(String cities) {
 
         String sql = String.format(
                 FIND_DISTRIBUTED_PRODUCTS_BY_CITY,
-                String.join(",", cities.stream().map(s -> String.format("'%s'", s)).toList())
+                String.format( "'%s'", cities.replace(",", "','"))
         );
-
 
         Future<List<ProductInfoProjection>> map = client.query(sql)
                 .execute()
                 .map(rows -> {
                     List<ProductInfoProjection> list = new ArrayList<>();
-
                     rows.forEach(row -> list.add(ProductInfoProjection.fromRow(row)));
-
                     return list;
                 });
 
@@ -104,6 +101,5 @@ public class ProductRepository implements PanacheRepository<Product> {
                 .completionStage(map.toCompletionStage())
                 .toMulti()
                 .flatMap(l -> Multi.createFrom().iterable(l));
-
     }
 }

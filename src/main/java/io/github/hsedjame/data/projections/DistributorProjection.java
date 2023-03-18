@@ -1,19 +1,13 @@
 package io.github.hsedjame.data.projections;
 
-import java.util.Optional;
+import io.vertx.mutiny.sqlclient.Row;
 
 public record DistributorProjection(String name, String cities) {
 
-    public static Optional<DistributorProjection> fromObject(Object o) {
-        var array = (Object[]) o;
-        if (array.length == 2) {
-            return Optional.of(new DistributorProjection(
-                            (String) array[0],
-                            (String) array[1]
-                    )
-            );
-        } else {
-            return Optional.empty();
-        }
+    public static DistributorProjection fromRow(Row row) {
+        return new DistributorProjection(
+                row.getString(Fields.NAME),
+                row.getString(Fields.CITIES)
+        );
     }
 }

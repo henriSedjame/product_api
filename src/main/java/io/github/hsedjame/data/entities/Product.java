@@ -5,7 +5,6 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import io.vertx.core.json.JsonObject;
 
 import javax.persistence.Entity;
-import java.util.Optional;
 
 
 @Entity(name = "products")
@@ -19,7 +18,7 @@ public class Product extends PanacheEntity {
         this.info = info;
     }
 
-    public static Optional<Product> withInfos(ProductInfo info) {
-        return info.toJson().map(Product::new);
+    public static Product withInfos(ProductInfo info) {
+        return new Product(JsonObject.mapFrom(info));
     }
 }

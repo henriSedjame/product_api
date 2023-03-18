@@ -2,10 +2,8 @@ package io.github.hsedjame.repositories;
 
 public class Queries {
 
-    public static final String NAME = "name";
-
     public static final String FIND_BY_NAME = """
-            SELECT  (info #>> '{}') as infos FROM products WHERE info ->> 'name' = :name
+            SELECT  (info #>> '{}') as info FROM products WHERE info ->> 'name' = $1
             """;
 
     public static final String FIND_DISTRIBUTORS = """
@@ -17,7 +15,7 @@ public class Queries {
                 SELECT
                     json_array_elements(info -> 'distributors') as value
                 FROM products
-                WHERE info ->> 'name' = :name
+                WHERE info ->> 'name' = $1
             ) distribs
             """;
 
@@ -27,7 +25,7 @@ public class Queries {
                  json_array_elements(info -> 'distributors') -> 'cities'
              ) as name
             FROM products
-            WHERE info ->> 'name' = :name
+            WHERE info ->> 'name' = $1
             """;
 
     public static final String FIND_DISTRIBUTED_PRODUCTS_BY_CITY = """

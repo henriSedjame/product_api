@@ -1,13 +1,11 @@
 package io.github.hsedjame.data.projections;
 
 
-import java.util.Optional;
+import io.vertx.mutiny.sqlclient.Row;
 
 public record ProductProjection(String info) {
 
-    public static Optional<ProductProjection> fromObject(Object o) {
-
-        return Optional.of(new ProductProjection((String) o));
-
+    public static ProductProjection fromRow(Row row) {
+        return new ProductProjection(row.getString(Fields.INFO));
     }
 }

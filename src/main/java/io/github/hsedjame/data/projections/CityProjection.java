@@ -1,9 +1,10 @@
 package io.github.hsedjame.data.projections;
 
-import java.util.Optional;
+import io.vertx.mutiny.sqlclient.Row;
 
 public record CityProjection(String name) {
-    public static Optional<CityProjection> fromObject(Object o) {
-        return Optional.of(new CityProjection((String) o));
+
+    public static CityProjection fromRow(Row row) {
+        return new CityProjection(row.getString(Fields.NAME));
     }
 }

@@ -1,29 +1,23 @@
 package io.github.hsedjame.repositories;
 
-import io.github.hsedjame.data.entities.Product;
 import io.github.hsedjame.data.projections.CityProjection;
 import io.github.hsedjame.data.projections.DistributorProjection;
 import io.github.hsedjame.data.projections.ProductInfoProjection;
 import io.github.hsedjame.data.projections.ProductProjection;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-import io.vertx.core.Future;
-import io.vertx.pgclient.PgPool;
+import io.vertx.mutiny.pgclient.PgPool;
+import io.vertx.mutiny.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.RowIterator;
+import io.vertx.mutiny.sqlclient.Tuple;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static io.github.hsedjame.repositories.Queries.*;
 
 @ApplicationScoped
-public class ProductRepository implements PanacheRepository<Product> {
-
-    @Inject
-    PgPool client;
+public record ProductRepository(@Inject PgPool client) {
 
     /**
      * Find a product information by its name
@@ -31,14 +25,14 @@ public class ProductRepository implements PanacheRepository<Product> {
      * @return product's information
      */
     public Uni<ProductProjection> findByName(String name) {
-        return getSession()
-                .flatMap(session -> session
-                        .createNativeQuery(FIND_BY_NAME)
-                        .setParameter(NAME, name)
-                        .getSingleResult()
-                )
-                .map(ProductProjection::fromObject)
-                .map(Optional::orElseThrow);
+        return client.preparedQuery(FIND_BY_NAME)
+                .execute(Tuple.of(name))
+                .onItem().transform(rows -> {
+                    RowIterator<Row> iterator = rows.iterator();
+                    return iterator.hasNext() ? ProductProjection.fromRow(iterator.next()) : null;
+                });
+
+
     }
 
     /**
@@ -47,16 +41,10 @@ public class ProductRepository implements PanacheRepository<Product> {
      * @return stream of distributors
      */
     public Multi<DistributorProjection> findDistributors(String name) {
-        return getSession()
-                .flatMap(session -> session
-                                    .createNativeQuery(FIND_DISTRIBUTORS)
-                                    .setParameter(NAME, name)
-                                    .getResultList()
-                )
-                .toMulti()
-                .flatMap(l -> Multi.createFrom().iterable(l))
-                .map(DistributorProjection::fromObject)
-                .map(Optional::orElseThrow);
+       return client.preparedQuery(FIND_DISTRIBUTORS)
+                .execute(Tuple.of(name))
+                .onItem().transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(DistributorProjection::fromRow);
     }
 
     /**
@@ -65,16 +53,10 @@ public class ProductRepository implements PanacheRepository<Product> {
      * @return list of cities
      */
     public Multi<CityProjection> findDistributionCities(String name) {
-        return getSession()
-                .flatMap(session -> session
-                        .createNativeQuery(FIND_DISTRIBUTION_CITIES)
-                        .setParameter(NAME, name)
-                        .getResultList()
-                )
-                .toMulti()
-                .flatMap(l -> Multi.createFrom().iterable(l))
-                .map(CityProjection::fromObject)
-                .map(Optional::orElseThrow);
+        return client.preparedQuery(FIND_DISTRIBUTION_CITIES)
+                .execute(Tuple.of(name))
+                .onItem().transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(CityProjection::fromRow);
     }
 
     /**
@@ -89,17 +71,9 @@ public class ProductRepository implements PanacheRepository<Product> {
                 String.format( "'%s'", cities.replace(",", "','"))
         );
 
-        Future<List<ProductInfoProjection>> map = client.query(sql)
+        return client.query(sql)
                 .execute()
-                .map(rows -> {
-                    List<ProductInfoProjection> list = new ArrayList<>();
-                    rows.forEach(row -> list.add(ProductInfoProjection.fromRow(row)));
-                    return list;
-                });
-
-        return Uni.createFrom()
-                .completionStage(map.toCompletionStage())
-                .toMulti()
-                .flatMap(l -> Multi.createFrom().iterable(l));
+                .onItem().transformToMulti(rows -> Multi.createFrom().iterable(rows))
+                .map(ProductInfoProjection::fromRow);
     }
 }

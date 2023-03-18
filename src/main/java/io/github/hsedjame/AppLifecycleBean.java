@@ -10,14 +10,13 @@ import javax.enterprise.event.Observes;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 
 @ApplicationScoped
 public class AppLifecycleBean {
 
-    void onStart(/*@Observes StartupEvent ev*/) {
+    void onStart(@Observes StartupEvent ev) {
 
         Distributor fnac = new Distributor("FNAC", List.of("Paris", "Poitiers", "Bordeaux"));
         Distributor darty = new Distributor("DARTY", List.of("Dijon", "Paris"));
@@ -35,7 +34,6 @@ public class AppLifecycleBean {
                 .with(
                         x -> Stream.of(xbox, ps, raspberrypi, mac, iphone)
                                 .map(Product::withInfos)
-                                .map(Optional::get)
                                 .forEach(p ->
                                     p.persistAndFlush()
                                             .subscribe()

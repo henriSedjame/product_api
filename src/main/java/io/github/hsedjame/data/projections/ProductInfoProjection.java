@@ -1,6 +1,6 @@
 package io.github.hsedjame.data.projections;
 
-import io.vertx.sqlclient.Row;
+import io.vertx.mutiny.sqlclient.Row;
 
 import java.math.BigDecimal;
 
@@ -8,9 +8,9 @@ public record ProductInfoProjection(String name, BigDecimal price, String distri
 
     public static ProductInfoProjection fromRow(Row row) {
         return new ProductInfoProjection(
-                row.getString("name"),
-                row.getBigDecimal("price"),
-                row.getString("distributors")
+                row.getString(Fields.NAME),
+                row.getBigDecimal(Fields.PRICE),
+                row.getString(Fields.DISTRIBUTORS)
         );
     }
 }
